@@ -1,19 +1,43 @@
-    import React from 'react'
-    import { Link } from 'react-router-dom'
+import React from "react";
+import { Link, NavLink } from "react-router-dom";
 
-    export default function navbar() {
-        return (
-            <>
-                <div className="">
-                    <nav className="navbar navbar-expand-lg navbar-dark bg-primary p-2">
-                        <Link to="/" className="navbar-brand">FullStack CRUD</Link>
-                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
+export default function Navbar() {
+  return (
+    <header className="topbar">
 
-                        <Link to="/addEmployee" className='btn btn-outline-light'>Add Employee</Link>
-                    </nav>
-                </div>
-            </>
-        )
-    }
+      <div className="topbar-inner">
+
+        <Link to="/" className="brand">
+
+          <span className="brand-mark">E</span>
+
+          <span>
+            People<span className="brand-light">Desk</span>
+            <small>EMPLOYEE PORTAL</small>
+          </span>
+
+        </Link>
+
+        <nav className="top-nav">
+
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            Dashboard
+          </NavLink>
+
+          <Link to="/addEmployee" className="nav-add">
+            ＋ Add Employee
+          </Link>
+
+        </nav>
+
+      </div>
+
+    </header>
+  );
+}

@@ -6,7 +6,7 @@ import Home from './page/Home';
 import AddEmployee from './function/addEmployee';
 import EditEmployee from './function/EditEmployee';
 import ViewEmployee from './function/ViewEmployee';
-
+import "./EmployeeManagement.css";
 function App() {
   return (  
     <div className='App'>

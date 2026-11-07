@@ -1,54 +1,131 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link, useParams } from "react-router-dom";
+
+const API = "http://localhost:8080/api/main/employee";
 
 export default function ViewEmployee() {
 
-    const [employee, setEmployee] = useState({
-        firstName: "",
-        lastName: "",
-        email: ""
-    });
+  const [employee, setEmployee] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    const {id} = useParams();
+  const { id } = useParams();
 
-    useEffect(() => {
-        loadEmployee();
-    }, []);
+  useEffect(() => {
 
     const loadEmployee = async () => {
-        const result = await axios.get(`http://localhost:8080/api/main/employee/${id}`);
-        setEmployee(result.data);
-    }
 
+      try {
+        const response = await axios.get(`${API}/${id}`);
+        setEmployee(response.data);
+
+      } catch (err) {
+        setError("Could not load employee details.");
+      } finally {
+        setLoading(false);
+      }
+
+    };
+
+    loadEmployee();
+
+  }, [id]);
+
+  if (loading) {
     return (
-        <div className='container'>
-            <div className='row'>
-                <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
-                    <h2 className='text-center m-4'>Employee Detail</h2>
-
-                    <div className='card'>
-                        <div className='card-header'>
-                            Details of Employee: {employee.id}
-                            <ul className='list-group list-group-flush'>
-                                <li className='list-group-item'>
-                                    <b>First name: </b>
-                                    {employee.firstName}
-                                </li>
-                                <li className='list-group-item'>
-                                    <b>Last name: </b>
-                                    {employee.lastName}
-                                </li>
-                                <li className='list-group-item'>
-                                    <b>Email: </b>
-                                    {employee.email}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <Link to={"/"} className='btn btn-primary my-2'>Back to Home</Link>
-                </div>
-            </div>
+      <main className="form-page">
+        <div className="empty-state">
+          <span className="loader"></span>
+          Loading employee...
         </div>
-    )
+      </main>
+    );
+  }
+
+  return (
+    <main className="form-page">
+
+      <Link to="/" className="back-link">
+        ← Back to Dashboard
+      </Link>
+
+      <section className="detail-card">
+
+        <div className="detail-top">
+
+          <span className="eyebrow">EMPLOYEE PROFILE</span>
+
+          <span className="id-pill">
+            ID #{id}
+          </span>
+
+        </div>
+
+        {error ? (
+
+          <div className="alert-message">{error}</div>
+
+        ) : employee && (
+
+          <>
+
+            <div className="profile-heading">
+
+              <span className="profile-avatar">
+                {`${employee.firstName?.[0] || ""}${employee.lastName?.[0] || ""}`.toUpperCase()}
+              </span>
+
+              <div>
+                <h1>
+                  {employee.firstName} {employee.lastName}
+                </h1>
+
+                <p>Employee Record</p>
+              </div>
+
+            </div>
+
+            <div className="detail-list">
+
+              <div>
+                <span>First Name</span>
+                <strong>{employee.firstName}</strong>
+              </div>
+
+              <div>
+                <span>Last Name</span>
+                <strong>{employee.lastName}</strong>
+              </div>
+
+              <div>
+                <span>Email Address</span>
+                <strong>{employee.email}</strong>
+              </div>
+
+            </div>
+
+            <div className="form-actions">
+
+              <Link to="/" className="secondary-button">
+                Back to Directory
+              </Link>
+
+              <Link
+                to={`/editEmployee/${id}`}
+                className="primary-button"
+              >
+                Edit Details
+              </Link>
+
+            </div>
+
+          </>
+
+        )}
+
+      </section>
+
+    </main>
+  );
 }

@@ -1,63 +1,176 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link, useNavigate, useParams } from "react-router-dom";
+
+const API = "http://localhost:8080/api/main/employee";
 
 export default function EditEmployee() {
 
-    let navigate = useNavigate();
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-    const {id} = useParams();
+  const [employee, setEmployee] = useState({
+    firstName: "",
+    lastName: "",
+    email: ""
+  });
 
-    const [employee, setEmployee] = useState({
-        firstName: "",
-        lastName: "",
-        email: ""
-    });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-    const {firstName, lastName, email} = employee;
-
-    const onInputChange = (e) => {
-        setEmployee({...employee,[e.target.name]: e.target.value})
-    };
-
-    useEffect(() => {
-        loadEmployee();
-    }, [])
-
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        await axios.put(`http://localhost:8080/api/main/employee/${id}`, employee);
-        navigate("/")
-    };
+  useEffect(() => {
 
     const loadEmployee = async () => {
-        const result = await axios.get(`http://localhost:8080/api/main/employee/${id}`);
-        setEmployee(result.data);
+
+      try {
+        const response = await axios.get(`${API}/${id}`);
+        setEmployee(response.data);
+
+      } catch (err) {
+        setError("Could not load employee details.");
+      } finally {
+        setLoading(false);
+      }
+
     };
 
+    loadEmployee();
+
+  }, [id]);
+
+  const onInputChange = (e) => {
+    setEmployee({
+      ...employee,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const onSubmit = async (e) => {
+
+    e.preventDefault();
+
+    try {
+      setSaving(true);
+      setError("");
+
+      await axios.put(`${API}/${id}`, employee);
+
+      navigate("/");
+
+    } catch (err) {
+      setError("Could not update employee. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+
+  };
+
+  if (loading) {
     return (
-        <div className='container'>
-            <div className='row'>
-                <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
-                    <h2 className='text-center m-4'>Edit Employee</h2>
-                    <form onSubmit={(e) => onSubmit(e)}>
-                        <div className='mb-3'>
-                            <label htmlFor="firstName" className='form-label'>First Name</label>
-                            <input type="text" className='form-control' placeholder='Enter your first name' name='firstName' required value={firstName} onChange={(e) => onInputChange(e)}/>
-                        </div>
-                        <div className='mb-3'>
-                            <label htmlFor="lastName" className='form-label'>Last Name</label>
-                            <input type="text" className='form-control' placeholder='Enter your last name' name='lastName' required value={lastName} onChange={(e) => onInputChange(e)}/>
-                        </div>
-                        <div className='mb-3'>
-                            <label htmlFor="email" className='form-label'>Email</label>
-                            <input type="email" className='form-control' placeholder='Enter your email' name='email' required value={email} onChange={(e) => onInputChange(e)}/>
-                        </div>
-                        <button type='submit' className='btn btn-outline-primary'>Submit</button>
-                        <Link to="/" className='btn btn-outline-danger m-2'>Cancel</Link>
-                    </form>
-                </div>
-            </div>
+      <main className="form-page">
+        <div className="empty-state">
+          <span className="loader"></span>
+          Loading employee...
         </div>
-    )
+      </main>
+    );
+  }
+
+  return (
+    <main className="form-page">
+
+      <Link to="/" className="back-link">
+        ← Back to Dashboard
+      </Link>
+
+      <section className="form-card">
+
+        <div className="form-intro">
+
+          <span className="form-icon edit-icon">✎</span>
+
+          <span className="eyebrow">EMPLOYEE DIRECTORY</span>
+
+          <h1>Edit Employee</h1>
+
+          <p>Update the details for employee #{id}.</p>
+
+        </div>
+
+        {error && (
+          <div className="alert-message">{error}</div>
+        )}
+
+        <form onSubmit={onSubmit} className="employee-form">
+
+          <div className="field-row">
+
+            <div className="form-field">
+
+              <label htmlFor="firstName">First Name</label>
+
+              <input
+                id="firstName"
+                name="firstName"
+                value={employee.firstName}
+                onChange={onInputChange}
+                required
+              />
+
+            </div>
+
+            <div className="form-field">
+
+              <label htmlFor="lastName">Last Name</label>
+
+              <input
+                id="lastName"
+                name="lastName"
+                value={employee.lastName}
+                onChange={onInputChange}
+                required
+              />
+
+            </div>
+
+          </div>
+
+          <div className="form-field">
+
+            <label htmlFor="email">Email Address</label>
+
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={employee.email}
+              onChange={onInputChange}
+              required
+            />
+
+          </div>
+
+          <div className="form-actions">
+
+            <Link to="/" className="secondary-button">
+              Cancel
+            </Link>
+
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={saving}
+            >
+              {saving ? "Updating..." : "Save Changes"}
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    </main>
+  );
 }
